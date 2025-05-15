@@ -1,0 +1,21 @@
+{
+	"name": "check-bili-live",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev --test-scheduled",
+		"start": "wrangler dev --test-scheduled",
+		"cf-typegen": "wrangler types",
+		"test": "npx wrangler dev --port=8788 --test-scheduled"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250515.0",
+		"@types/node": "^22.15.18",
+		"typescript": "^5.8.3",
+		"wrangler": "^4.15.1"
+	},
+	"dependencies": {
+		"arktype": "^2.1.20"
+	}
+}
