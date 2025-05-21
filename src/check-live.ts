@@ -148,9 +148,18 @@ async function requestBili(url: string): Promise<BiliLiveResType> {
 export async function checkLive(env: Env) {
 	const id: DurableObjectId = env.MY_DURABLE_OBJECT.idFromName('bili-live');
 	const stub = env.MY_DURABLE_OBJECT.get(id);
-	const uids = env.BILI_UPS.split(',')
+	const uidsStr = await env.KV_BILI_LIVE.get('up_ids');
+	const uids = uidsStr
+		?.split(',')
 		.map((id) => `uids[]=${id}`)
 		.join('&');
+	if (!uids) {
+		return null;
+	}
+	// const uids = env.BILI_UPS.split(',')
+	// 	.map((id) => `uids[]=${id}`)
+	// 	.join('&');
+	// https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids?uids[]=1625060795
 	const url = `https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids?${uids}&_t=${Date.now()}`;
 	let biliRes: BiliLiveResType | null = null;
 	let biliErr = null;

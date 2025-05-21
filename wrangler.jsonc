@@ -31,9 +31,15 @@
 			"*/10 12-17 * * *"
 		]
 	},
-	"vars": {
-		"BILI_UPS": "1625060795,1389148009,1914445316"
-	}
+	// "vars": {
+	// 	"BILI_UPS": "1625060795"
+	// },
+	"kv_namespaces": [
+		{
+			"binding": "KV_BILI_LIVE",
+			"id": "3f1d15d9ac854a81b62ce33a601aae6c"
+		}
+	]
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

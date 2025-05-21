@@ -86,6 +86,7 @@ export default {
 			return Response.json({
 				data,
 				env,
+				ups: await env.KV_BILI_LIVE.get('up_ids'),
 			});
 		}
 		return checkLive(env).then((res: any) => {
