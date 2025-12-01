@@ -12,7 +12,7 @@ declare namespace Cloudflare {
     // BILI_UPS: string;
     FT_SEND_KEY: string;
     MY_DURABLE_OBJECT: DurableObjectNamespace<
-      import("./src/index").MyDurableObject
+      import("./index").MyDurableObject
     >;
   }
 }

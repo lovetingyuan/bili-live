@@ -28,6 +28,13 @@ const BiliLiveRes = type({
 
 type BiliLiveResType = typeof BiliLiveRes.infer;
 
+/**
+ * @deprecated
+ * @param title
+ * @param content
+ * @param env
+ * @returns
+ */
 export function wechatNotify(title: string, content: string, env: Env) {
   const url = "https://wxpusher.zjiecode.com/api/send/message";
   const data = {
@@ -84,7 +91,9 @@ export async function wechatNotify2(title: string, content: string, env: Env) {
     message: string;
     data: { id: number; wxstatus: "" };
   } = await fetch(
-    `https://sctapi.ftqq.com/push?id=${res.data!.pushid}&readkey=${res.data!.readkey}`,
+    `https://sctapi.ftqq.com/push?id=${res.data!.pushid}&readkey=${
+      res.data!.readkey
+    }`
   ).then((r) => r.json());
 
   if (status.code === 0 && status.data.wxstatus) {
@@ -98,6 +107,28 @@ export async function wechatNotify2(title: string, content: string, env: Env) {
   throw new Error("failed to get wechat notify status");
 }
 
+export async function nftyNotify(title: string, content: string) {
+  return fetch("https://ntfy.sh/bilibili-up-living-listen-and-notification", {
+    method: "POST", // PUT works too
+    body: content,
+    headers: {
+      Title: title,
+      Priority: "urgent",
+      Tags: "tv",
+    },
+  })
+    .then((r) => r.json())
+    .then((r) => {
+      return r as {
+        id: string;
+        time: number;
+        expires: number;
+        event: "message";
+        topic: string;
+        message: string;
+      };
+    });
+}
 // 存储数据 https://www.npoint.io/docs/NPOINT_ID
 // async function saveToNpoint(data: any, env: Env) {
 // 	const response = await fetch('https://api.npoint.io/' + env.NPOINT_ID, {
@@ -128,7 +159,9 @@ let currentLivingUps: Record<string, LiveUp> = {};
 
 async function requestBili(url: string): Promise<BiliLiveResType> {
   // const aa = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  const aa = `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`;
+  const aa = `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(
+    url
+  )}`;
   // https://api.allorigins.win/raw?url=https%3A%2F%2Fapi.live.bilibili.com%2Froom%2Fv1%2FRoom%2Fget_status_info_by_uids%3Fuids%5B%5D%3D1625060795%26_t%3D1730117790491
   const response = await fetch(aa, {
     headers: {
@@ -173,7 +206,7 @@ export async function checkLive(env: Env) {
       if (validate instanceof type.errors) {
         // hover out.summary to see validation errors
         throw new Error(
-          `bili live check res not match schema, ${validate.summary}`,
+          `bili live check res not match schema, ${validate.summary}`
         );
       } else {
         break;
@@ -188,7 +221,7 @@ export async function checkLive(env: Env) {
   }
   if (biliRes.code !== 0) {
     throw new Error(
-      "bili api code is not 0 but " + biliRes.code + ":" + biliRes.message,
+      "bili api code is not 0 but " + biliRes.code + ":" + biliRes.message
     );
   }
   let hasNewLiveUp = false;
@@ -220,13 +253,19 @@ export async function checkLive(env: Env) {
     for (const mid in currentLivingUps) {
       const { uname, roomId, title } = currentLivingUps[mid];
       livings.push(
-        `- **${uname}** 正在直播：[${title || "点击查看"}](https://live.bilibili.com/h5/${roomId})`,
+        `- **${uname}** 正在直播：[${
+          title || "点击查看"
+        }](https://live.bilibili.com/h5/${roomId})`
       );
     }
+    await nftyNotify(
+      `有 ${livings.length} 位UP正在直播`,
+      [...livings].join("; ")
+    );
     await wechatNotify2(
       `有${livings.length}位UP正在直播`,
       [...livings, "", "**🌼记得开直播录制**"].join("\n"),
-      env,
+      env
     );
 
     // await wechatNotify2(`有${livings.length}位UP正在直播`, `<ul>${livings.join('')}</ul><p>🌼记得开直播录制</p>`, env);
