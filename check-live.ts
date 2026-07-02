@@ -93,7 +93,7 @@ export async function wechatNotify2(title: string, content: string, env: Env) {
   } = await fetch(
     `https://sctapi.ftqq.com/push?id=${res.data!.pushid}&readkey=${
       res.data!.readkey
-    }`
+    }`,
   ).then((r) => r.json());
 
   if (status.code === 0 && status.data.wxstatus) {
@@ -157,11 +157,15 @@ interface LiveUp {
 
 let currentLivingUps: Record<string, LiveUp> = {};
 
-async function requestBili(url: string): Promise<BiliLiveResType> {
+async function requestBili(
+  url: string,
+  token: string,
+): Promise<BiliLiveResType> {
   // const aa = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  const aa = `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(
-    url
-  )}`;
+  // const aa = `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(
+  //   url,
+  // )}`;
+  const aa = `https://vercel-proxy-delta-lac.vercel.app/api/proxy?token=${token}&url=${encodeURIComponent(url)}`;
   // https://api.allorigins.win/raw?url=https%3A%2F%2Fapi.live.bilibili.com%2Froom%2Fv1%2FRoom%2Fget_status_info_by_uids%3Fuids%5B%5D%3D1625060795%26_t%3D1730117790491
   const response = await fetch(aa, {
     headers: {
@@ -200,13 +204,13 @@ export async function checkLive(env: Env) {
   let biliErr = null;
   for (let i = 0; i < 3; i++) {
     try {
-      biliRes = await requestBili(url);
+      biliRes = await requestBili(url, env.VERCEL_PROXY_SAFE_TOKEN);
       const validate = BiliLiveRes(biliRes);
       // console.log(biliRes, validate);
       if (validate instanceof type.errors) {
         // hover out.summary to see validation errors
         throw new Error(
-          `bili live check res not match schema, ${validate.summary}`
+          `bili live check res not match schema, ${validate.summary}`,
         );
       } else {
         break;
@@ -221,7 +225,7 @@ export async function checkLive(env: Env) {
   }
   if (biliRes.code !== 0) {
     throw new Error(
-      "bili api code is not 0 but " + biliRes.code + ":" + biliRes.message
+      "bili api code is not 0 but " + biliRes.code + ":" + biliRes.message,
     );
   }
   let hasNewLiveUp = false;
@@ -247,25 +251,28 @@ export async function checkLive(env: Env) {
       hasChanged = true;
     }
   }
-
   if (hasNewLiveUp) {
     const livings: string[] = [];
     for (const mid in currentLivingUps) {
+      if (!currentLivingUps[mid]) {
+        delete currentLivingUps[mid];
+        continue;
+      }
       const { uname, roomId, title } = currentLivingUps[mid];
       livings.push(
         `- **${uname}** 正在直播：[${
           title || "点击查看"
-        }](https://live.bilibili.com/h5/${roomId})`
+        }](https://live.bilibili.com/h5/${roomId})`,
       );
     }
     await nftyNotify(
       `有 ${livings.length} 位UP正在直播`,
-      [...livings].join("; ")
+      [...livings].join("; "),
     );
     await wechatNotify2(
       `有${livings.length}位UP正在直播`,
       [...livings, "", "**🌼记得开直播录制**"].join("\n"),
-      env
+      env,
     );
 
     // await wechatNotify2(`有${livings.length}位UP正在直播`, `<ul>${livings.join('')}</ul><p>🌼记得开直播录制</p>`, env);

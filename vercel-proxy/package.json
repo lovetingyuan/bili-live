@@ -1,0 +1,11 @@
+{
+  "name": "vercel-get-proxy",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes vercel dev",
+    "deploy": "npx --yes vercel deploy --prod --yes --scope tingyuans-projects",
+    "test": "node --test test/*.test.mjs"
+  }
+}

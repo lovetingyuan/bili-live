@@ -10,10 +10,9 @@
     "test": "npx wrangler dev --port=8788 --test-scheduled"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250718.0",
     "@types/node": "^22.16.4",
     "typescript": "^5.8.3",
-    "wrangler": "^4.25.0"
+    "wrangler": "^4.106.0"
   },
   "dependencies": {
     "arktype": "^2.1.20"

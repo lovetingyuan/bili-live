@@ -38,6 +38,7 @@
     {
       "binding": "KV_BILI_LIVE",
       "id": "3f1d15d9ac854a81b62ce33a601aae6c",
+      "remote": true,
     },
   ],
   /**
